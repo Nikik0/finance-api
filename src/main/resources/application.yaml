@@ -1,0 +1,9 @@
+info:
+    application:
+        name: TimeManager
+        description: TimeManagerAPI
+        author: Nikik0
+        version: '@project.version@'
+spring:
+    profiles:
+        active: dev
