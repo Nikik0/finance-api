@@ -65,7 +65,7 @@ public class ApiRequestController {
         return externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", StockEntity.class, HttpMethod.GET).flatMap(
                 response -> {
                     log.info("response class " + response.getClass());
-                    log.info("response data " + response.toString());
+                    log.info("response data " + response);
                     //log.info("received " + response);
                     return Mono.just(response);
                 }
