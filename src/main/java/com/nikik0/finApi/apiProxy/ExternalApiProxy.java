@@ -28,9 +28,9 @@ public class ExternalApiProxy {
     }
 
 
-    public <T> Flux<T> performCallToExternalApi(String uri, Class T, HttpMethod requestMethod){
+    public <T> Flux<T> performCallToExternalApi(String prefixUri,String uri, Class T, HttpMethod requestMethod){
         return this.webClient.method(requestMethod)
-                .uri("tops?token=" + token + uri)
+                .uri(prefixUri + "?token=" + token + uri)
                 .retrieve()
                 .bodyToFlux(T)
                 .doOnError(
