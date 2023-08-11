@@ -1,15 +1,17 @@
 package com.nikik0.finApi.controllers;
 
 import com.nikik0.finApi.apiProxy.ExternalApiProxy;
+import com.nikik0.finApi.entities.StockEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayDeque;
+import java.util.List;
+import java.util.Queue;
 
 @RestController
 @RequestMapping("fin")
@@ -30,7 +32,7 @@ public class ApiRequestController {
     }
     @RequestMapping("/test2")
     public void testCall2(){
-        externalApiProxy.performCallToExternalApi("&symbols=aapl", Object.class, HttpMethod.GET).flatMap(
+        externalApiProxy.performCallToExternalApi("tops","&symbols=aapl", Object.class, HttpMethod.GET).flatMap(
                 response ->{
                     log.info("received response " + response);
                     return Mono.just(response);
@@ -38,6 +40,36 @@ public class ApiRequestController {
         ).subscribe();
     }
 
+    @RequestMapping("/test3")
+    public void testCall3(){
+        Queue<Object> responses = new ArrayDeque<>();
+        externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", StockEntity.class, HttpMethod.GET).flatMap(
+                response -> {
+                    responses.add(response);
+                    //log.info("received " + response);
+                    return Mono.just(response);
+                }
+        ).buffer(20).subscribe(this::postProcessing);
+    }
 
+    private int counter = 0;
+
+    private void postProcessing(List<Object> result) {
+        counter++;
+        log.info("received data part " + counter + " size of " + result.size());
+        log.info("first element in batch " + result.get(0));
+    }
+
+    @RequestMapping("/test4")
+    public Mono<Object> testCall4(){
+        return externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", StockEntity.class, HttpMethod.GET).flatMap(
+                response -> {
+                    log.info("response class " + response.getClass());
+                    log.info("response data " + response.toString());
+                    //log.info("received " + response);
+                    return Mono.just(response);
+                }
+        ).last();
+    }
 
 }
