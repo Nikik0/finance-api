@@ -45,13 +45,14 @@ public class ApiRequestController {
     @RequestMapping("/test3")
     public void testCall3(){
         Queue<Object> responses = new ArrayDeque<>();
+        log.warn("started test");
         externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", StockEntity.class, HttpMethod.GET).flatMap(
                 response -> {
                     responses.add(response);
                     //log.info("received " + response);
                     return Mono.just((StockEntity) response);
                 }
-        ).buffer(20).subscribe(batchDataService::saveDataInBatches);
+        ).buffer(100).subscribe(batchDataService::saveDataInBatches);
     }
 
     private int counter = 0;
@@ -72,6 +73,11 @@ public class ApiRequestController {
                     return Mono.just(response);
                 }
         ).last();
+    }
+
+    @RequestMapping("/count")
+    public void testCount(){
+        batchDataService.countSavedEntities();
     }
 
 }
