@@ -42,7 +42,6 @@ public class ExternalApiProxy {
 
     public Flux<Object> call(){
         return this.webClient.get().uri("tops?token=" + token + "&symbols=aapl").retrieve()
-
                 .bodyToFlux(Object.class);
     }
 }
