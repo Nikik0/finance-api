@@ -2,6 +2,7 @@ package com.nikik0.finApi.controllers;
 
 import com.nikik0.finApi.apiProxy.ExternalApiProxy;
 import com.nikik0.finApi.entities.StockEntity;
+import com.nikik0.finApi.services.BatchDataService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
@@ -19,6 +20,7 @@ import java.util.Queue;
 @Slf4j
 public class ApiRequestController {
     private final ExternalApiProxy externalApiProxy;
+    private final BatchDataService batchDataService;
 
     @RequestMapping("/test")
     public void testCall(){
@@ -47,9 +49,9 @@ public class ApiRequestController {
                 response -> {
                     responses.add(response);
                     //log.info("received " + response);
-                    return Mono.just(response);
+                    return Mono.just((StockEntity) response);
                 }
-        ).buffer(20).subscribe(this::postProcessing);
+        ).buffer(20).subscribe(batchDataService::saveDataInBatches);
     }
 
     private int counter = 0;

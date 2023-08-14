@@ -7,3 +7,9 @@ info:
 spring:
     profiles:
         active: dev
+    jpa:
+        properties:
+            hibernate:
+                jdbc:
+                    batch_size: 100
+
