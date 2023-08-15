@@ -1,6 +1,7 @@
 package com.nikik0.finApi.controllers;
 
 import com.nikik0.finApi.apiProxy.ExternalApiProxy;
+import com.nikik0.finApi.entities.CompanyEntity;
 import com.nikik0.finApi.entities.StockEntity;
 import com.nikik0.finApi.services.BatchDataService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayDeque;
@@ -41,16 +43,25 @@ public class ApiRequestController {
                 }
         ).subscribe();
     }
+    @RequestMapping("/stocks")
+    public Flux<Object> getStocks(){
+        return externalApiProxy.performCallToExternalApi("/stock/MSFT/quote","", StockEntity.class, HttpMethod.GET).flatMap(
+                response -> {
+                    log.info("received " + response);
+                    return Mono.just(response);
+                }
+        );
+    }
 
     @RequestMapping("/test3")
     public void testCall3(){
         Queue<Object> responses = new ArrayDeque<>();
         log.warn("started test");
-        externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", StockEntity.class, HttpMethod.GET).flatMap(
+        externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyEntity.class, HttpMethod.GET).flatMap(
                 response -> {
                     responses.add(response);
                     //log.info("received " + response);
-                    return Mono.just((StockEntity) response);
+                    return Mono.just((CompanyEntity) response);
                 }
         ).buffer(100).subscribe(batchDataService::saveDataInBatches);
     }
@@ -65,7 +76,7 @@ public class ApiRequestController {
 
     @RequestMapping("/test4")
     public Mono<Object> testCall4(){
-        return externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", StockEntity.class, HttpMethod.GET).flatMap(
+        return externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyEntity.class, HttpMethod.GET).flatMap(
                 response -> {
                     log.info("response class " + response.getClass());
                     log.info("response data " + response);
