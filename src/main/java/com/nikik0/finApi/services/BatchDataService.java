@@ -1,40 +1,35 @@
 package com.nikik0.finApi.services;
 
-import com.nikik0.finApi.entities.StockEntity;
-import com.nikik0.finApi.repositories.StockRepository;
+import com.nikik0.finApi.entities.CompanyEntity;
+import com.nikik0.finApi.repositories.CompanyRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
-import javax.sql.DataSource;
-import java.lang.reflect.Method;
 import java.util.List;
 
 @Service
 @Slf4j
 public class BatchDataService {
 
-    private final StockRepository dataRepository;
+    private final CompanyRepository dataRepository;
 
     @Autowired
-    public BatchDataService(StockRepository dataRepository) {
+    public BatchDataService(CompanyRepository dataRepository) {
         this.dataRepository = dataRepository;
     }
 
-//    public void saveDataInBatches(List<StockEntity> dataList, int batchSize) {
+//    public void saveDataInBatches(List<CompanyEntity> dataList, int batchSize) {
 //        dataRepository.saveAll(dataList);
 ////        for (int i = 0; i < dataList.size(); i += batchSize) {
 ////            int endIndex = Math.min(i + batchSize, dataList.size());
-////            List<StockEntity> batch = dataList.subList(i, endIndex);
+////            List<CompanyEntity> batch = dataList.subList(i, endIndex);
 ////            dataRepository.saveAll(batch);
 ////        }
 //    }
 
-    public void saveDataInBatches(List<StockEntity> stockEntities) {
+    public void saveDataInBatches(List<CompanyEntity> stockEntities) {
         //log.info("going to save " + stockEntities.size());
         log.info("saving batch size of " + stockEntities.size());
         if (stockEntities.size() != 100 ){
