@@ -1,20 +1,31 @@
 package com.nikik0.finApi.apiProxy;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.requests.ApiError;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorResourceFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
+import reactor.netty.resources.LoopResources;
+
 
 import java.net.http.HttpRequest;
+import java.util.function.Function;
 
 @Service
 @Slf4j
 public class ExternalApiProxy {
-    private final WebClient webClient;
+
+    private WebClient webClient;
 
     private final String baseUrl = "https://cloud.iexapis.com";
 
@@ -22,15 +33,13 @@ public class ExternalApiProxy {
 
     private String token = "pk_f95e6f2d71c34284bcd2a567d5de7fb1";
 
-
     public ExternalApiProxy() {
         this.webClient = WebClient.builder().baseUrl(baseUrl + "/" + version + "/").build();
     }
 
-
     public <T> Flux<T> performCallToExternalApi(String prefixUri,String uri, Class T, HttpMethod requestMethod){
         return this.webClient.method(requestMethod)
-                .uri(prefixUri + "?token=" + token + uri)
+                .uri(buildUri(prefixUri, uri))
                 .retrieve()
                 .bodyToFlux(T)
                 .doOnError(
@@ -38,6 +47,9 @@ public class ExternalApiProxy {
                 );
     }
 
+    private String buildUri(String prefix, String postfix){
+        return prefix + "?token=" + token + postfix;
+    }
 
 
     public Flux<Object> call(){

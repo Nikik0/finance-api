@@ -2,12 +2,15 @@ package com.nikik0.finApi.controllers;
 
 import com.nikik0.finApi.apiProxy.ExternalApiProxy;
 import com.nikik0.finApi.dtos.CompanyDto;
+import com.nikik0.finApi.dtos.StockDto;
 import com.nikik0.finApi.entities.CompanyEntity;
 import com.nikik0.finApi.entities.StockEntity;
 import com.nikik0.finApi.services.BatchDataService;
+import com.nikik0.finApi.services.CompanyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -24,6 +27,7 @@ import java.util.Queue;
 public class ApiRequestController {
     private final ExternalApiProxy externalApiProxy;
     private final BatchDataService batchDataService;
+    private final CompanyService companyService;
 
     @RequestMapping("/test")
     public void testCall(){
@@ -37,21 +41,7 @@ public class ApiRequestController {
     }
     @RequestMapping("/test2")
     public void testCall2(){
-        externalApiProxy.performCallToExternalApi("tops","&symbols=aapl", Object.class, HttpMethod.GET).flatMap(
-                response ->{
-                    log.info("received response " + response);
-                    return Mono.just(response);
-                }
-        ).subscribe();
-    }
-    @RequestMapping("/stocks")
-    public Flux<Object> getStocks(){
-        return externalApiProxy.performCallToExternalApi("/stock/MSFT/quote","", StockEntity.class, HttpMethod.GET).flatMap(
-                response -> {
-                    log.info("received " + response);
-                    return Mono.just(response);
-                }
-        );
+        companyService.getCompanies();
     }
 
     @RequestMapping("/test3")
@@ -65,6 +55,26 @@ public class ApiRequestController {
                     return Mono.just((CompanyDto) response);
                 }
         ).buffer(100).subscribe(batchDataService::saveDataInBatches);
+    }
+
+    @RequestMapping("/stocks/{company}")
+    public Flux<StockDto> getStocks(@PathVariable String company){
+        return externalApiProxy.performCallToExternalApi("/stock/" + company + "/quote","", StockDto.class, HttpMethod.GET).flatMap(
+                response -> {
+                    log.info("received " + response);
+                    return Mono.just((StockDto) response);
+                }
+        );
+    }
+
+    @RequestMapping("/companies")
+    public Flux<CompanyDto> getCompanies(){
+        return externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET).flatMap(
+                response -> {
+                    //log.info("received " + response);
+                    return Mono.just((CompanyDto) response);
+                }
+        );
     }
 
     private int counter = 0;
