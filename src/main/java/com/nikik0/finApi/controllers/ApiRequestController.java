@@ -1,6 +1,7 @@
 package com.nikik0.finApi.controllers;
 
 import com.nikik0.finApi.apiProxy.ExternalApiProxy;
+import com.nikik0.finApi.dtos.CompanyDto;
 import com.nikik0.finApi.entities.CompanyEntity;
 import com.nikik0.finApi.entities.StockEntity;
 import com.nikik0.finApi.services.BatchDataService;
@@ -57,11 +58,11 @@ public class ApiRequestController {
     public void testCall3(){
         Queue<Object> responses = new ArrayDeque<>();
         log.warn("started test");
-        externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyEntity.class, HttpMethod.GET).flatMap(
+        externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET).flatMap(
                 response -> {
                     responses.add(response);
                     //log.info("received " + response);
-                    return Mono.just((CompanyEntity) response);
+                    return Mono.just((CompanyDto) response);
                 }
         ).buffer(100).subscribe(batchDataService::saveDataInBatches);
     }
