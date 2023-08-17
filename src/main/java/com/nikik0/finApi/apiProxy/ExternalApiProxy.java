@@ -16,9 +16,11 @@ import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
+import reactor.util.retry.Retry;
 
 
 import java.net.http.HttpRequest;
+import java.time.Duration;
 import java.util.function.Function;
 
 @Service
@@ -31,17 +33,19 @@ public class ExternalApiProxy {
 
     private final String version = "stable";
 
-    private String token = "pk_f95e6f2d71c34284bcd2a567d5de7fb1";
+    private String token = "pk_48c37b6c4d5541c8a9c38671f4922c88";
 
     public ExternalApiProxy() {
         this.webClient = WebClient.builder().baseUrl(baseUrl + "/" + version + "/").build();
     }
 
     public <T> Flux<T> performCallToExternalApi(String prefixUri,String uri, Class T, HttpMethod requestMethod){
+        log.info("call started to " + buildUri(prefixUri, uri));
         return this.webClient.method(requestMethod)
                 .uri(buildUri(prefixUri, uri))
                 .retrieve()
                 .bodyToFlux(T)
+                .retryWhen(Retry.fixedDelay(1000, Duration.ofSeconds(10)))
                 .doOnError(
                         throwable -> log.error("Error occurred while processing response " + throwable.toString())
                 );
