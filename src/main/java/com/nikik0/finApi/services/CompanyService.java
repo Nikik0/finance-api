@@ -44,6 +44,7 @@ public class CompanyService {
     public void getCompanies(){
         externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET).flatMap(
                 response -> {
+                    //log.info("comp " + response);
                     //log.info("received " + response);
                     return Mono.just((CompanyDto) response);
                 }
