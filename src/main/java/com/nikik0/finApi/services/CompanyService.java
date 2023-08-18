@@ -28,11 +28,13 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final StockRepository stockRepository;
     private final ExternalApiProxy externalApiProxy;
+    private final StockService stockService;
     private ExecutorService executorService = Executors.newFixedThreadPool(10);
     private final CompanyMapper companyMapper;
     private final StockMapper stockMapper;
     @Value("${settings.batchSize}")
     private Long batchSize;
+
 
     public void test(){
         executorService.submit(
@@ -46,36 +48,44 @@ public class CompanyService {
                 response -> {
                     //log.info("comp " + response);
                     //log.info("received " + response);
+                    companyRepository.save(companyMapper.mapFromDtoToEntity((CompanyDto) response)).subscribe();
                     return Mono.just((CompanyDto) response);
                 }
         ).subscribe(this::createTaskForGettingStocks);
     }
 
     private Integer i = 0;
+
     private void createTaskForGettingStocks(CompanyDto companyDto) {
         log.info("task submitted to exec service " + i);
         i++;
-        executorService.submit(() -> getStocks(companyDto));
-    }
-    public void getStocks1(CompanyDto companyDto){
-
-        log.info("called for " + companyDto.getSymbol() + " at " + LocalDateTime.now());
+        executorService.submit(
+                () -> stockService.getStocks(companyDto)
+        );
     }
 
-    public void getStocks(CompanyDto companyDto){
-        externalApiProxy.performCallToExternalApi("/stock/" + companyDto.getSymbol() + "/quote","", StockDto.class, HttpMethod.GET).flatMap(
-                response -> {
-                    log.info("received " + response);
-                    return Mono.just((StockDto) response);
-                }
-        ).onErrorComplete().map(stockMapper::mapDtoToEntity)
-                .buffer(100)
-                .subscribe(this::saveStocks);
+    public Mono<Long> getTotalCount(){
+        return companyRepository.count();
     }
+//    public void getStocks1(CompanyDto companyDto){
+//
+//        log.info("called for " + companyDto.getSymbol() + " at " + LocalDateTime.now());
+//    }
 
-
-
-    private void saveStocks(List<StockEntity> stockEntities){
-        //stockRepository.saveAll(stockEntities).subscribe();
-    }
+//    public void getStocks(CompanyDto companyDto){
+//        externalApiProxy.performCallToExternalApi("/stock/" + companyDto.getSymbol() + "/quote","", StockDto.class, HttpMethod.GET).flatMap(
+//                response -> {
+//                    log.info("received " + response);
+//                    return Mono.just((StockDto) response);
+//                }
+//        ).onErrorComplete().map(stockMapper::mapDtoToEntity)
+//                .buffer(100)
+//                .subscribe(this::saveStocks);
+//    }
+//
+//
+//
+//    private void saveStocks(List<StockEntity> stockEntities){
+//        //stockRepository.saveAll(stockEntities).subscribe();
+//    }
 }

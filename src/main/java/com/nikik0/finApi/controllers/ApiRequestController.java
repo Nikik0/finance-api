@@ -7,6 +7,7 @@ import com.nikik0.finApi.entities.CompanyEntity;
 import com.nikik0.finApi.entities.StockEntity;
 import com.nikik0.finApi.services.BatchDataService;
 import com.nikik0.finApi.services.CompanyService;
+import com.nikik0.finApi.services.StockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
@@ -28,6 +29,7 @@ public class ApiRequestController {
     private final ExternalApiProxy externalApiProxy;
     private final BatchDataService batchDataService;
     private final CompanyService companyService;
+    private final StockService stockService;
 
     @RequestMapping("/test")
     public void testCall(){
@@ -42,6 +44,23 @@ public class ApiRequestController {
     @RequestMapping("/test2")
     public void testCall2(){
         companyService.getCompanies();
+    }
+    @RequestMapping("/companies/total")
+    public void getCompaniesTotalCount(){
+        companyService.getTotalCount().flatMap(total -> {
+                    log.info("total amount of company entities " + total);
+                    return Mono.just(total);
+                }
+        ).subscribe();
+    }
+
+    @RequestMapping("/stocks/total")
+    public void getStocksTotalCount() {
+        stockService.getTotalCount().flatMap(total -> {
+                    log.info("total amount of stocks entities " + total);
+                    return Mono.just(total);
+                }
+        ).subscribe();
     }
 
     @RequestMapping("/test3")
