@@ -7,8 +7,9 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Data
 @NoArgsConstructor
-@Table("companies")
+@Table("company")
 public class CompanyEntity {
+    private Long id;
     private String symbol;
     private String exchange;
     @Column("exchange_suffix")
