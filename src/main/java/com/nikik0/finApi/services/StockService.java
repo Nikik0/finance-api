@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -44,5 +45,9 @@ public class StockService {
     }
     private void saveStocks(List<StockEntity> stockEntities){
         stockRepository.saveAll(stockEntities).subscribe();
+    }
+
+    public Flux<StockEntity> getHighestVolumeStocks(){
+        return stockRepository.findTop10ByVolumeIsNotNullOrderByVolumeDesc();
     }
 }
