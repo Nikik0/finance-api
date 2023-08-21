@@ -4,8 +4,6 @@ import com.nikik0.finApi.apiProxy.ExternalApiProxy;
 import com.nikik0.finApi.dtos.CompanyDto;
 import com.nikik0.finApi.dtos.StockDto;
 import com.nikik0.finApi.entities.CompanyEntity;
-import com.nikik0.finApi.entities.StockEntity;
-import com.nikik0.finApi.services.BatchDataService;
 import com.nikik0.finApi.services.CompanyService;
 import com.nikik0.finApi.services.StockService;
 import lombok.RequiredArgsConstructor;
@@ -18,17 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayDeque;
-import java.util.List;
-import java.util.Queue;
-
 @RestController
 @RequestMapping("fin")
 @RequiredArgsConstructor
 @Slf4j
 public class ApiRequestController {
     private final ExternalApiProxy externalApiProxy;
-    private final BatchDataService batchDataService;
     private final CompanyService companyService;
     private final StockService stockService;
 
@@ -42,6 +35,7 @@ public class ApiRequestController {
                 }
         ).subscribe();
     }
+
     @Scheduled(fixedRate = 60*60*1000)
     @RequestMapping("/test2")
     public void testCall2(){
@@ -65,18 +59,18 @@ public class ApiRequestController {
         ).subscribe();
     }
 
-    @RequestMapping("/test3")
-    public void testCall3(){
-        Queue<Object> responses = new ArrayDeque<>();
-        log.warn("started test");
-        externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET).flatMap(
-                response -> {
-                    responses.add(response);
-                    //log.info("received " + response);
-                    return Mono.just((CompanyDto) response);
-                }
-        ).buffer(100).subscribe(batchDataService::saveDataInBatches);
-    }
+//    @RequestMapping("/test3")
+//    public void testCall3(){
+//        Queue<Object> responses = new ArrayDeque<>();
+//        log.warn("started test");
+//        externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET).flatMap(
+//                response -> {
+//                    responses.add(response);
+//                    //log.info("received " + response);
+//                    return Mono.just((CompanyDto) response);
+//                }
+//        ).buffer(100).subscribe(batchDataService::saveDataInBatches);
+//    }
 
     @RequestMapping("/stocks/{company}")
     public Flux<StockDto> getStocks(@PathVariable String company){
@@ -98,14 +92,6 @@ public class ApiRequestController {
         );
     }
 
-    private int counter = 0;
-
-    private void postProcessing(List<Object> result) {
-        counter++;
-        log.info("received data part " + counter + " size of " + result.size());
-        log.info("first element in batch " + result.get(0));
-    }
-
     @RequestMapping("/test4")
     public Mono<Object> testCall4(){
         return externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyEntity.class, HttpMethod.GET).flatMap(
@@ -118,9 +104,5 @@ public class ApiRequestController {
         ).last();
     }
 
-    @RequestMapping("/count")
-    public void testCount(){
-        batchDataService.countSavedEntities();
-    }
 
 }
