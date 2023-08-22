@@ -18,10 +18,18 @@ public class StatisticsService {
     @Scheduled(fixedRate = 1000*5)
     public void highestVolumeStocks() {
         log.info("called stats method");
-        stockService.getHighestVolumeStocks().flatMap(res -> {
+        stockService.getHighestVolumeStocks(5).flatMap(res -> {
                     log.info("highest stocks are  from " + res.getCompanyName() + "; volume is " + res.getVolume() + "; symbol is " + res.getSymbol());
                     return Mono.just(res);
                 }
         ).subscribe();
+    }
+    @Scheduled(fixedRate = 1000*5)
+    public void mostChangedStocks(){
+        log.info("most changed stocks are");
+        stockService.getMostChangedStocks(5).flatMap(res -> {
+            log.info("stock is " + res.getSymbol() + " company " + res.getCompanyName() + " changed by " + res.getChangePercent());
+            return Mono.just(res);
+        }).subscribe();
     }
 }
