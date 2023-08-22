@@ -47,7 +47,10 @@ public class StockService {
         stockRepository.saveAll(stockEntities).subscribe();
     }
 
-    public Flux<StockEntity> getHighestVolumeStocks(){
-        return stockRepository.findTop10ByVolumeIsNotNullOrderByVolumeDesc();
+    public Flux<StockEntity> getMostChangedStocks(Integer amount){
+        return stockRepository.findMostChangedStocks(amount);
+    }
+    public Flux<StockEntity> getHighestVolumeStocks(Integer amount){
+        return stockRepository.findHighestVolumeStocks(amount);
     }
 }
