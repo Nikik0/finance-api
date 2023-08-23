@@ -15,7 +15,7 @@ public class StatisticsService {
 
     private final StockService stockService;
 
-    @Scheduled(fixedRate = 1000*5)
+    //@Scheduled(fixedRate = 1000*5)
     public void highestVolumeStocks() {
         log.info("called stats method");
         stockService.getHighestVolumeStocks(5).flatMap(res -> {
@@ -24,7 +24,7 @@ public class StatisticsService {
                 }
         ).subscribe();
     }
-    @Scheduled(fixedRate = 1000*5)
+    //@Scheduled(fixedRate = 1000*5)
     public void mostChangedStocks(){
         log.info("most changed stocks are");
         stockService.getMostChangedStocks(5).flatMap(res -> {
