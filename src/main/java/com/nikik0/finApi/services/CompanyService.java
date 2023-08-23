@@ -51,16 +51,18 @@ public class CompanyService {
                     companyRepository.save(companyMapper.mapFromDtoToEntity((CompanyDto) response)).subscribe();
                     return Mono.just((CompanyDto) response);
                 }
-        ).subscribe(this::createTaskForGettingStocks);
+        ).doOnSubscribe(x -> log.info("started saving"))
+                .doFinally(x -> log.info("saving finished"))
+                .subscribe(this::createTaskForGettingStocks);
     }
 
     private Integer i = 0;
 
     private void createTaskForGettingStocks(CompanyDto companyDto) {
-        log.info("task submitted to exec service " + i);
+        //log.info("task submitted to exec service " + i);
         i++;
         executorService.submit(
-                () -> stockService.getStocks(companyDto)
+                () -> stockService.getStocks1(companyDto)
         );
     }
 

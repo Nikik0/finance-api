@@ -27,7 +27,7 @@ public class StockService {
 
     public void getStocks1(CompanyDto companyDto){
 
-        log.info("called for " + companyDto.getSymbol() + " at " + LocalDateTime.now());
+        //log.info("called for " + companyDto.getSymbol() + " at " + LocalDateTime.now());
     }
 
     public Mono<Long> getTotalCount(){
@@ -40,7 +40,7 @@ public class StockService {
                             return Mono.just((StockDto) response);
                         }
                 ).onErrorComplete().map(stockMapper::mapDtoToEntity)
-                .buffer(100)
+                .buffer(10000)
                 .subscribe(this::saveStocks);
     }
     private void saveStocks(List<StockEntity> stockEntities){
