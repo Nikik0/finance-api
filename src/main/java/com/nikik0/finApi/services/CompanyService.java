@@ -59,7 +59,7 @@ public class CompanyService {
     }
     public void getCompanies(){
         externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET)
-                .buffer(10000)
+                .buffer(1000)
                 .flatMap(
                         response -> {
                             //log.info("comp " + response);
