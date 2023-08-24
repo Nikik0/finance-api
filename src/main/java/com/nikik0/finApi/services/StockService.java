@@ -5,6 +5,7 @@ import com.nikik0.finApi.dtos.CompanyDto;
 import com.nikik0.finApi.dtos.StockDto;
 import com.nikik0.finApi.entities.StockEntity;
 import com.nikik0.finApi.mappers.StockMapper;
+import com.nikik0.finApi.repositories.CustomStockRepositoryImpl;
 import com.nikik0.finApi.repositories.StockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ public class StockService {
     private final StockMapper stockMapper;
     private final StockRepository stockRepository;
     private final ExternalApiProxy externalApiProxy;
-
+    private final CustomStockRepositoryImpl customStockRepository;
     public void getStocks1(CompanyDto companyDto){
 
         //log.info("called for " + companyDto.getSymbol() + " at " + LocalDateTime.now());
@@ -47,6 +48,9 @@ public class StockService {
         stockRepository.saveAll(stockEntities).subscribe();
     }
 
+    private void saveStocks1(List<StockEntity> stockEntities){
+        customStockRepository.saveAll(stockEntities);
+    }
     public Flux<StockEntity> getMostChangedStocks(Integer amount){
         return stockRepository.findMostChangedStocks(amount);
     }
