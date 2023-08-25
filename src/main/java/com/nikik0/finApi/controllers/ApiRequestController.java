@@ -36,11 +36,6 @@ public class ApiRequestController {
         ).subscribe();
     }
 
-    @Scheduled(fixedRate = 60*60*1000)
-    @RequestMapping("/test2")
-    public void testCall2(){
-        companyService.getCompanies();
-    }
     @RequestMapping("/companies/total")
     public void getCompaniesTotalCount(){
         companyService.getTotalCount().flatMap(total -> {
