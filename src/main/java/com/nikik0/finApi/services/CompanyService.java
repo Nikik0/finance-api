@@ -57,7 +57,7 @@ public class CompanyService {
                 .doFinally(x -> log.info("saving finished"))
                 .subscribe(this::createTaskForGettingStocks);
     }
-    public void getCompanies(){
+    public void getCompanies4(){
         externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET)
                 .buffer(1000)
                 .flatMap(
@@ -73,6 +73,17 @@ public class CompanyService {
                 .subscribe();
         //.subscribe(this::createTaskForGettingStocks);
     }
+
+    public void getCompanies(){
+        externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET)
+                .buffer(1000)
+                .subscribe(list -> companyRepository.saveAll(
+                        list.stream().map(x -> companyMapper.mapFromDtoToEntity((CompanyDto) x)).collect(Collectors.toList())).subscribe()
+                );
+
+        //.subscribe(this::createTaskForGettingStocks);
+    }
+
     public void getCompanies2(){
         externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET)
                 .buffer(1000)
