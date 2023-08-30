@@ -45,18 +45,6 @@ public class CompanyService {
                 }
         );
     }
-    public void getCompanies1(){
-        externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET).flatMap(
-                response -> {
-                    //log.info("comp " + response);
-                    //log.info("received " + response);
-                    companyRepository.save(companyMapper.mapFromDtoToEntity((CompanyDto) response)).subscribe();
-                    return Mono.just((CompanyDto) response);
-                }
-        ).doOnSubscribe(x -> log.info("started saving"))
-                .doFinally(x -> log.info("saving finished"))
-                .subscribe(this::createTaskForGettingStocks);
-    }
     public void getCompanies4(){
         externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET)
                 .buffer(1000)
@@ -65,8 +53,9 @@ public class CompanyService {
                             //log.info("comp " + response);
                             //log.info("received " + response);
                             //log.info("company input list size is " + response.stream().map(x -> companyMapper.mapFromDtoToEntity((CompanyDto) x)).collect(Collectors.toList()).size());
-                            companyRepository.saveAll(response.stream().map(x -> companyMapper.mapFromDtoToEntity((CompanyDto) x)).collect(Collectors.toList())).subscribe();
-                            return Mono.just(response.stream().map(x -> companyMapper.mapFromDtoToEntity((CompanyDto) x)).collect(Collectors.toList()));
+                            //companyRepository.saveAll(response.stream().map(x -> companyMapper.mapFromDtoToEntity((CompanyDto) x)).collect(Collectors.toList())).subscribe();
+                            return Mono.just(companyRepository.saveAll(response.stream().map(x -> companyMapper.mapFromDtoToEntity((CompanyDto) x)).collect(Collectors.toList())));
+                            //return Mono.just(response.stream().map(x -> companyMapper.mapFromDtoToEntity((CompanyDto) x)).collect(Collectors.toList()));
                         }
                 ).doOnSubscribe(x -> log.info("started saving"))
                 .doFinally(x -> log.info("saving finished"))
@@ -82,23 +71,6 @@ public class CompanyService {
                 );
 
         //.subscribe(this::createTaskForGettingStocks);
-    }
-
-    public void getCompanies2(){
-        externalApiProxy.performCallToExternalApi("/ref-data/symbols", "", CompanyDto.class, HttpMethod.GET)
-                .buffer(1000)
-                .flatMap(
-                        response -> {
-                            //log.info("comp " + response);
-                            //log.info("received " + response);
-                            //log.info("company input list size is " + response.stream().map(x -> companyMapper.mapFromDtoToEntity((CompanyDto) x)).collect(Collectors.toList()).size());
-                            customCompanyRepository.saveAll(response.stream().map(x -> companyMapper.mapFromDtoToEntity((CompanyDto) x)).collect(Collectors.toList()));
-                            return Mono.just(response.stream().map(x -> companyMapper.mapFromDtoToEntity((CompanyDto) x)).collect(Collectors.toList()));
-                        }
-                ).doOnSubscribe(x -> log.info("started saving"))
-                .doFinally(x -> log.info("saving finished"))
-                .subscribe();
-                //.subscribe(this::createTaskForGettingStocks);
     }
 
     private Integer i = 0;
