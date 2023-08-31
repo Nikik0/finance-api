@@ -2,7 +2,9 @@ package com.nikik0.finApi.services;
 
 import com.nikik0.finApi.apiProxy.ExternalApiProxy;
 import com.nikik0.finApi.dtos.CompanyDto;
+import com.nikik0.finApi.dtos.CompanyFinDto;
 import com.nikik0.finApi.dtos.StockDto;
+import com.nikik0.finApi.dtos.StockFinDto;
 import com.nikik0.finApi.entities.StockEntity;
 import com.nikik0.finApi.mappers.CompanyMapper;
 import com.nikik0.finApi.mappers.StockMapper;
@@ -38,6 +40,10 @@ public class CompanyService {
     private Long batchSize;
 
 
+    public void getCompaniesFin(){
+        externalApiProxy.performCallToExternalApi("stock/symbol", "exchange=US", StockFinDto.class, HttpMethod.GET)
+                .subscribe(res -> log.info("received {}", res));
+    }
     public void test(){
         executorService.submit(
                 () -> {
