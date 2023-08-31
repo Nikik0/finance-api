@@ -14,8 +14,13 @@ public class ApiInfoRequestJob {
 
     private final CompanyService companyService;
 
-    @Scheduled(fixedRate = 60*60*1000)
+    //@Scheduled(fixedRate = 60*60*1000)
     public void requestDataFromApi(){
-        companyService.getCompanies();
+        companyService.getCompanies4();
+    }
+
+    @Scheduled(fixedRate = 60*60*1000)
+    public void requestDataFromFinIoApi(){
+        companyService.getCompaniesFin();
     }
 }

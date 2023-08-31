@@ -2,6 +2,7 @@ package com.nikik0.finApi.apiProxy;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.protocol.types.Field;
 import org.apache.kafka.common.requests.ApiError;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -29,11 +30,15 @@ public class ExternalApiProxy {
 
     private WebClient webClient;
 
-    private final String baseUrl = "https://cloud.iexapis.com";
+    private final String baseUrl1 = "https://cloud.iexapis.com";
+    private final String baseUrl = "https://finnhub.io/api";
 
-    private final String version = "stable";
+    private final String version1 = "stable";
+    private final String version = "v1";
 
-    private String token = "pk_48c37b6c4d5541c8a9c38671f4922c88";
+    private String token1 = "pk_48c37b6c4d5541c8a9c38671f4922c88";
+    private String token = "cjo0lg9r01qmd05u3gu0cjo0lg9r01qmd05u3gug";
+
 
     public ExternalApiProxy() {
         this.webClient = WebClient.builder().baseUrl(baseUrl + "/" + version + "/").build();
@@ -52,6 +57,7 @@ public class ExternalApiProxy {
     }
 
     private String buildUri(String prefix, String postfix){
+        if (!postfix.isEmpty()) postfix = "&" + postfix;
         return prefix + "?token=" + token + postfix;
     }
 
