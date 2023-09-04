@@ -46,7 +46,7 @@ public class CompanyService {
     public void getCompaniesFin(){
         externalApiProxy.performCallToExternalApi("search", "q=", CompanySymbolResultDto.class, HttpMethod.GET)
                 .subscribe(res ->
-                        log.info("received {}", res));
+                        log.info("received {}", ((CompanySymbolResultDto) res).getResult().size()));
     }
     public void test(){
         executorService.submit(

@@ -44,13 +44,15 @@ public class ExternalApiProxy {
 
 
     public ExternalApiProxy() {
-        final ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
-                .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(16*1024*1024))
+        final Integer codecInMemSize = 16*1024*1024;
+        final ExchangeStrategies exchangeStrategies = ExchangeStrategies
+                .builder()
+                .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(codecInMemSize))
                 .build();
         this.webClient = WebClient.builder().exchangeStrategies(exchangeStrategies).baseUrl(baseUrl + "/" + version + "/").build();
     }
 
-    public <T> Flux<T> performCallToExternalApi1(String prefixUri,String uri, Class T, HttpMethod requestMethod){
+    public <T> Flux<T> performCallToExternalApi(String prefixUri,String uri, Class T, HttpMethod requestMethod){
         log.info("call started to " + buildUri(prefixUri, uri));
         return this.webClient.method(requestMethod)
                 .uri(buildUri(prefixUri, uri))
@@ -62,12 +64,12 @@ public class ExternalApiProxy {
                 );
     }
 
-    public <T> Flux<T> performCallToExternalApi(String prefixUri,String uri, Class T, HttpMethod requestMethod){
+    public <T> Flux<T> performCallToExternalApi1(String prefixUri,String uri, Class T, HttpMethod requestMethod){
         log.info("call started to " + buildUri(prefixUri, uri));
         this.webClient.method(requestMethod)
                 .uri(buildUri(prefixUri, uri))
                 .retrieve()
-                .bodyToMono(Object.class)
+                .bodyToMono(T)
                 //.retryWhen(Retry.fixedDelay(1000, Duration.ofSeconds(10)))
                 .flatMap(
                         x-> {
