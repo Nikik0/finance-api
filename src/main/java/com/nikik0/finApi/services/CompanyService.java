@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -45,8 +46,10 @@ public class CompanyService {
 
     public void getCompaniesFin(){
         externalApiProxy.performCallToExternalApi("search", "q=", CompanySymbolResultDto.class, HttpMethod.GET)
+                .flatMap(result -> Flux.just(((CompanySymbolResultDto) result).getResult()))
+                //.buffer(1000)
                 .subscribe(res ->
-                        log.info("received {}", ((CompanySymbolResultDto) res).getResult().size()));
+                        log.info("received {}", res));//((CompanySymbolResultDto) res).getResult().size()));
     }
     public void test(){
         executorService.submit(
