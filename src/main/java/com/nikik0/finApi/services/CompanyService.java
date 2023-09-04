@@ -1,10 +1,7 @@
 package com.nikik0.finApi.services;
 
 import com.nikik0.finApi.apiProxy.ExternalApiProxy;
-import com.nikik0.finApi.dtos.CompanyDto;
-import com.nikik0.finApi.dtos.CompanyFinDto;
-import com.nikik0.finApi.dtos.StockDto;
-import com.nikik0.finApi.dtos.StockFinDto;
+import com.nikik0.finApi.dtos.*;
 import com.nikik0.finApi.entities.StockEntity;
 import com.nikik0.finApi.mappers.CompanyMapper;
 import com.nikik0.finApi.mappers.StockMapper;
@@ -40,9 +37,16 @@ public class CompanyService {
     private Long batchSize;
 
 
-    public void getCompaniesFin(){
+    public void getCompaniesFin1(){
         externalApiProxy.performCallToExternalApi("stock/symbol", "exchange=US", StockFinDto.class, HttpMethod.GET)
-                .subscribe(res -> log.info("received {}", res));
+                .subscribe(res ->
+                        log.info("received {}", ((StockFinDto) res).getSymbol()));
+    }
+
+    public void getCompaniesFin(){
+        externalApiProxy.performCallToExternalApi("search", "q=", CompanySymbolResultDto.class, HttpMethod.GET)
+                .subscribe(res ->
+                        log.info("received {}", res));
     }
     public void test(){
         executorService.submit(
@@ -56,6 +60,7 @@ public class CompanyService {
                 .buffer(1000)
                 .flatMap(
                         response -> {
+
                             //log.info("comp " + response);
                             //log.info("received " + response);
                             //log.info("company input list size is " + response.stream().map(x -> companyMapper.mapFromDtoToEntity((CompanyDto) x)).collect(Collectors.toList()).size());
