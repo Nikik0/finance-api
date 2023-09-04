@@ -6,11 +6,14 @@ import org.apache.kafka.common.protocol.types.Field;
 import org.apache.kafka.common.requests.ApiError;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorResourceFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,10 +44,13 @@ public class ExternalApiProxy {
 
 
     public ExternalApiProxy() {
-        this.webClient = WebClient.builder().baseUrl(baseUrl + "/" + version + "/").build();
+        final ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
+                .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(16*1024*1024))
+                .build();
+        this.webClient = WebClient.builder().exchangeStrategies(exchangeStrategies).baseUrl(baseUrl + "/" + version + "/").build();
     }
 
-    public <T> Flux<T> performCallToExternalApi(String prefixUri,String uri, Class T, HttpMethod requestMethod){
+    public <T> Flux<T> performCallToExternalApi1(String prefixUri,String uri, Class T, HttpMethod requestMethod){
         log.info("call started to " + buildUri(prefixUri, uri));
         return this.webClient.method(requestMethod)
                 .uri(buildUri(prefixUri, uri))
@@ -54,6 +60,25 @@ public class ExternalApiProxy {
                 .doOnError(
                         throwable -> log.error("Error occurred while processing response " + throwable.toString())
                 );
+    }
+
+    public <T> Flux<T> performCallToExternalApi(String prefixUri,String uri, Class T, HttpMethod requestMethod){
+        log.info("call started to " + buildUri(prefixUri, uri));
+        this.webClient.method(requestMethod)
+                .uri(buildUri(prefixUri, uri))
+                .retrieve()
+                .bodyToMono(Object.class)
+                //.retryWhen(Retry.fixedDelay(1000, Duration.ofSeconds(10)))
+                .flatMap(
+                        x-> {
+                            log.info(" Received " + x.toString());
+                            return Mono.just(x);
+                        }
+                )
+                .doOnError(
+                        throwable -> log.error("Error occurred while processing response " + throwable.toString())
+                ).subscribe();
+        return Flux.empty();
     }
 
     private String buildUri(String prefix, String postfix){
