@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class CompanyFinDto {
+public class SymbolFinDto {
     @JsonProperty("description")
     String description;
     @JsonProperty("displaySymbol")
