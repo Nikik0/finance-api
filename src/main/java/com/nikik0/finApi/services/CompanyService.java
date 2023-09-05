@@ -46,10 +46,10 @@ public class CompanyService {
 
     public void getCompaniesFin(){
         externalApiProxy.performCallToExternalApi("search", "q=", CompanySymbolResultDto.class, HttpMethod.GET)
-                .flatMap(result -> Flux.just(((CompanySymbolResultDto) result).getResult()))
-                //.buffer(1000)
+                .flatMap(result -> Flux.fromIterable(((CompanySymbolResultDto) result).getResult()))
+                .buffer(1000)
                 .subscribe(res ->
-                        log.info("received {}", res));//((CompanySymbolResultDto) res).getResult().size()));
+                        log.info("received {}", res.size()));//((CompanySymbolResultDto) res).getResult().size()));
     }
     public void test(){
         executorService.submit(
